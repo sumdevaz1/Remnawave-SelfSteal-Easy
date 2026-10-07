@@ -1,0 +1,35 @@
+{
+  "log": { "loglevel": "warning" },
+  "inbounds": [
+    {
+      "tag": "reality-selfsteal",
+      "port": 443,
+      "listen": "0.0.0.0",
+      "protocol": "vless",
+      "settings": { "clients": [], "decryption": "none" },
+      "sniffing": { "enabled": true, "destOverride": ["http", "tls", "quic"] },
+      "streamSettings": {
+        "network": "raw",
+        "security": "reality",
+        "realitySettings": {
+          "target": "127.0.0.1:9443",
+          "xver": 1,
+          "shortIds": ["<SHORT_ID>"],
+          "privateKey": "<PRIVATE_KEY>",
+          "serverNames": ["nt.example.com"]
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    { "tag": "DIRECT", "protocol": "freedom" },
+    { "tag": "BLOCK", "protocol": "blackhole" }
+  ],
+  "routing": {
+    "rules": [
+      { "ip": ["geoip:private"], "outboundTag": "BLOCK" },
+      { "domain": ["geosite:private"], "outboundTag": "BLOCK" },
+      { "protocol": ["bittorrent"], "outboundTag": "BLOCK" }
+    ]
+  }
+}

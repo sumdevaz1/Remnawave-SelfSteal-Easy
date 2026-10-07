@@ -1,0 +1,58 @@
+# RU split routing for mihomo (Clash.Meta)
+# Idea: .ru / RU services go DIRECT (real RU IP, so banks and RU apps work
+# with the VPN left on); everything else goes through the node.
+# Merge these blocks into the mihomo template used for the subscription.
+
+proxies:
+  - name: "NODE"
+    type: vless
+    server: nt.example.com
+    port: 443
+    uuid: <UUID>
+    network: tcp
+    udp: true
+    tls: true
+    flow: xtls-rprx-vision
+    servername: nt.example.com
+    client-fingerprint: chrome
+    reality-opts:
+      public-key: <PUBLIC_KEY>
+      short-id: <SHORT_ID>
+
+proxy-groups:
+  - name: PROXY
+    type: select
+    proxies:
+      - NODE
+
+dns:
+  enable: true
+  ipv6: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - "+.ru"
+    - "+.su"
+    - "+.xn--p1ai"
+  default-nameserver:
+    - 77.88.8.8
+    - 1.1.1.1
+  nameserver:
+    - https://dns.google/dns-query
+    - https://1.1.1.1/dns-query
+  nameserver-policy:
+    "+.ru": [77.88.8.8, 77.88.8.1]
+    "+.su": [77.88.8.8, 77.88.8.1]
+    "+.xn--p1ai": [77.88.8.8, 77.88.8.1]
+    "geosite:category-ru": [77.88.8.8, 77.88.8.1]
+
+rules:
+  - DOMAIN-SUFFIX,example.com,DIRECT
+  - GEOSITE,private,DIRECT
+  - GEOIP,private,DIRECT,no-resolve
+  - DOMAIN-SUFFIX,ru,DIRECT
+  - DOMAIN-SUFFIX,su,DIRECT
+  - DOMAIN-SUFFIX,xn--p1ai,DIRECT
+  - GEOSITE,category-ru,DIRECT
+  - GEOIP,RU,DIRECT,no-resolve
+  - MATCH,PROXY
